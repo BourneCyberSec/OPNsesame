@@ -14,3 +14,6 @@ chmod +x install
 
 You can run script form anywhere by typing OPNsesame
 
+Within the tmux session you can filter out airodump scans for open networks by using:
+
+airodump-ng --encrypt opn {interface}
