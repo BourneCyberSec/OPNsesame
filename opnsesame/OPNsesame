@@ -1,0 +1,59 @@
+#!/bin/bash
+clear
+
+figlet -f Crawford2 OPNsesame; date; neofetch; 
+
+echo -e "\e[1;33m [WARNING]! Make sure that this Interface allows you to change the MAC address!\e[0m"
+echo -e "\e[1;33m [WARNING]! This will temporarily disable the Interface, so if running through [SSH] beware!\e[0m"
+echo -e "\e[1;33m [WARNING]! Make sure you have an Interface card that supports Monitor-Mode!\e[0m"
+echo -e "\e[1;33m Displaying all Network interface cards ...\e[0m"
+
+
+sleep 0.5
+echo -e "\e[0;35m --------------------------------------------------\e[0m"
+ls /sys/class/net
+sleep 0.5
+read  -p 'Select Interface: ' card
+echo -e "\e[0;35m --------------------------------------------------\e[0m"
+echo [$card] selected
+
+while true; do
+    read -p "Do you want to randomize the MAC of this interface? " yn
+    case $yn in
+        [Yy]* ) ifconfig $card down; macchanger -r $card; ifconfig $card up; echo -e "\e[1;34m MAC Address has been changed!\e[0m"; echo -e "\e[1;34m Goodbye, Thanks for using this Script!!\e[0m"; echo -e "\e[0;35m --------------------------------------------------\e[0m" ; exit;;
+        [Nn]* )  echo -e "\e[1;32m [OK]\e[0m"; break;;
+	[exit]* )echo -e "\e[1;34m Goodbye\e[0m";exit;;
+	* ) echo "Please answer yes or no.";;
+esac
+
+done
+
+echo -e "\e[0;35m --------------------------------------------------\e[0m"
+
+while true; do
+	read -p "Do you want to scan for a new MAC address using Monitor-Mode? " yn
+echo -e "\e[0;35m --------------------------------------------------\e[0m"
+
+	case $yn in
+		[Yy]* )ls /sys/class/net; sleep 0.2; read -p 'Select Interface for Monitor-Mode: ' monitor;  m="mon"; com="$monitor$m"; screen -d -m airmon-ng start $monitor; sleep 1.5 ;echo -e "\e[0;31m Opening airodump-ng!..  Use [ctrl+c] to stop scanning and to exit please type [exit]!..\e[0m"; echo -e "\e[0;32m If you want to scan a cetain AP type: [airodump-ng -c {Channel Number} --bssid {bssid of AP} wlanX {X being the name of your chosen Interface}]\e[0m"; read -n 1 -s -r -p  "[Press any key to continue]"; BAR=$com; tmux new-session -s one \; setenv FOO $BAR \; send-keys -t 0 "export FOO="$BAR C-m \; send-keys -t 0 'airodump-ng $FOO' C-m \; clear ;break;;
+		[Nn]* )echo -e "\e[0;31m Opening airodump-ng!..  Use [ctrl+c] to stop scanning and to exit please type [exit]!..\e[0m"; echo -e "\e[0;32m If you want to scan a cetain AP type: [airodump-ng -c {Channel Number} --bssid {bssid of AP} wlanX {X being the name of your chosen Interface}]\e[0m"; read -n 1 -s -r -p  "[Press any key to continue]"; BAR=$card; tmux new-session -s one \; setenv FOO $BAR \; send-keys -t 0 "export FOO="$BAR C-m \; send-keys -t 0 'airodump-ng $FOO' C-m; clear ;break;;
+		[exit]* )echo -e "\e[1;34m Goodbye\e[0m";exit;;
+	esac
+done
+
+echo -e "\e[0;35m --------------------------------------------------\e[0m" 
+screen -d -m airmon-ng stop $com
+echo -e "\e[1;33m Stopping Services...[OK]\e[0m"
+sleep 1
+read -p 'Please enther the MAC address you want to spoof: ' mac
+echo [$mac] is selected
+sleep 0.5
+ifconfig $card down
+echo [$card] MAC is being changed to [$mac].. .
+sleep 1
+macchanger -m $mac $card
+ifconfig $card up
+echo -e "\e[0;35m --------------------------------------------------\e[0m"
+echo -e "\e[1;34m Goodbye, Interface automatically set to Managed-Mode!!\e[0m";
+echo -e "\e[1;34m Goodbye, Thanks for using this Script!!\e[0m";
+echo -e "\e[0;35m --------------------------------------------------\e[0m"
